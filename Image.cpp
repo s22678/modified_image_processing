@@ -132,19 +132,27 @@ void Image::ReadHeader(std::ifstream& input_stream)
            
             height = atoi(word.c_str());
             line = rest;
-            break;
+            step = 3;
         }
 
         // pobieramy kolejny parametr - skale szarosci z naglowka
         if (step == 3)
         {
-            extract_word(line, word, rest);
+            if (magic_number != "P1")
+            {
+                extract_word(line, word, rest);
 
-            if (len_trim(word) == 0)
-                continue;
-            
-            max_pixel_value = atoi(word.c_str());
-            break;
+                if (len_trim(word) == 0)
+                    continue;
+
+                max_pixel_value = atoi(word.c_str());
+                break;
+            }
+            else
+            {
+                max_pixel_value = 1;
+                break;
+            }
         }
 
     }
@@ -227,10 +235,12 @@ void Image::ResizeImage(int new_width, int new_height)
     width = new_width;
     height = new_height;
 
+    pixels.clear();
+
     // podmieniamy piksele obrazu na nowe
     for(int i = 0; i < temp.size(); i++)
     {
-        *pixels[i] = *temp[i];
+        pixels.push_back(new image_pixel(*temp[i]));
         delete temp[i];
     } 
 }
@@ -264,6 +274,11 @@ void Image::RotateImage(float angle)
             if ((0 <= xp && xp < width) && ((0 <= yp && yp < height)))
             {
                 *(output_color) = *(pixels[yp * width + xp]);
+                temp[y * width + x] = output_color;
+            }
+            else
+            {
+                output_color->set_pixel(max_pixel_value);
                 temp[y * width + x] = output_color;
             }
          }
@@ -348,7 +363,7 @@ void Image::ApplyBlur(const std::string& method)
 
                 if (target_y >= 0 && target_y < height && target_x >= 0 && target_x < width)
                 {
-                    *output_color = *(pixels[target_y * width + target_x]) * mask[i];
+                    *output_color += *(pixels[target_y * width + target_x]) * mask[i];
                 }
 
             }
@@ -402,7 +417,9 @@ void Image::ReduceNoise()
             }
 
             // sortujemy piksele rosnaco
-            std::sort(median_filter.begin(), median_filter.end(), [&median_filter](image_pixel*& x, image_pixel*& y) { return x < y; });
+            std::sort(median_filter.begin(), median_filter.end(), [&median_filter](image_pixel*& x, image_pixel*& y) { 
+                return x < y; 
+             });
             // BubbleSort(median_filter);
 
             // wybieramy srodkowy piksel i umieszczamy go w nowej tablicy z pikselami

@@ -76,7 +76,11 @@ void GenerateImage(std::vector<std::string>& instructions)
 		}
     }
 
-    delete image;
+    if (image != nullptr)
+    {
+        delete image;
+        image = 0;
+    }
 }
 
 int main(int argc, char* argv[])

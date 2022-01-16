@@ -1,18 +1,33 @@
 #include "image_pixel.h"
 #include <numeric>
 #include <tuple>
+#include <string>
 
+/**
+ * dla jednokanalowych obrazow zwraca wartosc piksela, dla obrazu RGB zwraca srednia arytmetyczna wartosci RGB
+ * @param const reference do vector<uinty16_t>
+ * @return double - srednia arytmetyczna
+ */
 double get_average(const std::vector<uint16_t>& vec)
 {
     return std::accumulate(vec.begin(), vec.end(), 0.0, [&](double a, double b){return a + b / vec.size(); });
 }
 
+/**
+ * copy constructor
+ * @param const reference do pixela ktorego chcemy skopiowac
+ * @return image_pixel - kopia pixelu umieszczonego w parametrze
+ */
 image_pixel::image_pixel(const image_pixel& obj)
 {
     pixel_ = obj.pixel_;
     size_ = obj.size_;
 }
 
+/**
+ * ustaw wszystkie kanaly pixela na jedna wartosc. np dla RGB ustawi R = wartosc, G = wartosc, B = wartosc
+ * @param const reference do int - ustaw wartosc pixela na wartosc tego parametru
+ */
 void image_pixel::set_pixel(const int& t)
 {
     for (int i = 0; i < pixel_.size(); i++)
@@ -21,6 +36,12 @@ void image_pixel::set_pixel(const int& t)
     }
 }
 
+/**
+ * przeciazony output stream '<<'
+ * @param reference do ostream
+ * @param const reference do image_pixel - pixel, ktory chcemy umiescic w strumieniu
+ * @return reference do ostream
+ */
 std::ostream& operator<<(std::ostream& os, const image_pixel& ip)
 {
     if(ip.size_ == 3)
@@ -34,6 +55,12 @@ std::ostream& operator<<(std::ostream& os, const image_pixel& ip)
     return os;
 }
 
+/**
+ * przeciazony input stream '>>'
+ * @param reference do istream
+ * @param reference do image_pixel do ktorego chcemy dodac dane ze strumienia
+ * @return reference do istream
+ */
 std::istream& operator>> (std::istream& in, image_pixel& ip)
 {
     if(ip.size_ == 3)
@@ -43,7 +70,7 @@ std::istream& operator>> (std::istream& in, image_pixel& ip)
         {
             uint16_t val;
             in >> tmp;
-            val = (uint16_t)stoi(tmp);
+            val = (uint16_t)std::stoi(tmp);
             ip.pixel_[i] = val;
         }
     }
@@ -52,12 +79,17 @@ std::istream& operator>> (std::istream& in, image_pixel& ip)
         std::string tmp;
         uint16_t val;
         in >> tmp;
-        val = (uint16_t)stoi(tmp);
+        val = (uint16_t)std:: stoi(tmp);
         ip.pixel_[0] = val;
     }
     return in;
 }
-
+/**
+ * przeciazony operator '+', dodaje dwa pixele do siebie
+ * @param image_pixel - lewa strona dodawania
+ * @param const reference do image_pixel - prawa strona dodawania
+ * @return image_pixel - suma pixeli
+ */
 image_pixel operator+ (image_pixel lhs, const image_pixel& rhs)
 {
     for (int i = 0; i < lhs.size_; i++)
@@ -67,7 +99,12 @@ image_pixel operator+ (image_pixel lhs, const image_pixel& rhs)
 
     return lhs;
 }
-
+/**
+ * przeciazony operator '-', odejmuje dwa pixele od siebie
+ * @param image_pixel, lewa strona odejmowania
+ * @param const reference do image_pixel, prawa strona odejmowania
+ * @return image_pixel = roznica pixeli
+ */
 image_pixel operator- (image_pixel lhs, const image_pixel& rhs)
 {
     for (int i = 0; i < lhs.size_; i++)
@@ -77,7 +114,12 @@ image_pixel operator- (image_pixel lhs, const image_pixel& rhs)
 
     return lhs;
 }
-
+/**
+ * przeciazony operator '*', mnozy dwa pixele ze soba
+ * @param image_pixel, lewa strona mnozenia
+ * @param const reference do image_pixel, prawa strona mnozenia
+ * @return image_pixel = iloczyn pixeli
+ */
 image_pixel operator * (image_pixel lhs, const image_pixel& rhs)
 {
     for (int i = 0; i < lhs.size_; i++)
@@ -97,25 +139,34 @@ image_pixel operator / (image_pixel lhs, const image_pixel& rhs)
 
     return lhs;
 }
-
+/**
+ * przeciazony operator '<', porownuje rozmiary pixeli
+ * @param const reference do image_pixel, lewa strona porownania
+ * @param const reference do image_pixel, prawa strona porownania
+ * @return bool = true jesli prawy pixel jest wiekszy
+ */
 bool operator< (const image_pixel& lhs, const image_pixel& rhs)
 {
-    // if (lhs.pixel_.size() == 3)
-    // {
-    //     return std::tie(lhs.pixel_[0], lhs.pixel_[1], lhs.pixel_[2])
-    //         < std::tie(rhs.pixel_[0], rhs.pixel_[1], rhs.pixel_[2]); // keep the same order
-    // }
     auto right = get_average(rhs.pixel_);
     auto left = get_average(lhs.pixel_);
 
     return left < right;
 }
-
+/**
+ * przeciazony operator '>', porownuje rozmiary pixeli
+ * @param const reference do image_pixel, lewa strona porownania
+ * @param const reference do image_pixel, prawa strona porownania
+ * @return bool = true jesli lewy pixel jest wiekszy
+ */
 bool operator> (const image_pixel& lhs, const image_pixel& rhs)
 {
     return rhs < lhs;
 }
-
+/**
+ * przeciazony operator '+=', przypisuje sume pixela z innym pixelem do siebie samego
+ * @param const reference do image_pixel, prawa strona sumy
+ * @return reference do image_pixel
+ */
 image_pixel& image_pixel::operator+= (const image_pixel& rhs)
 {
     for(int i = 0; i < size_; i++)
@@ -124,7 +175,11 @@ image_pixel& image_pixel::operator+= (const image_pixel& rhs)
     }
     return *this;
 }
-
+/**
+ * przeciazony operator '-=', przypisuje roznice pixela z lewej strony od pixela z prawej strony do siebie samego
+ * @param const reference do image_pixel, prawa strona roznicy
+ * @return reference do image_pixel
+ */
 image_pixel& image_pixel::operator-= (const image_pixel& rhs)
 {
     for(int i = 0; i < size_; i++)
@@ -134,6 +189,11 @@ image_pixel& image_pixel::operator-= (const image_pixel& rhs)
     return *this;
 }
 
+/**
+ * przeciazony operator '*=', przypisuje iloczony pixela z lewej strony z pixelem z prawej strony do siebie samego
+ * @param const reference do image_pixel, prawa strona iloczynu
+ * @return reference do image_pixel
+ */
 image_pixel& image_pixel::operator*= (const image_pixel& rhs)
 {
     for(int i = 0; i < size_; i++)
@@ -143,6 +203,12 @@ image_pixel& image_pixel::operator*= (const image_pixel& rhs)
     return *this;
 }
 
+/**
+ * metoda wylaczona
+ * przeciazony operator '/=', przypisuje iloraz pixela z lewej strony przez pixel z prawej strony do siebie samego
+ * @param const reference do image_pixel, prawa strona ilorazu
+ * @return reference do image_pixel
+ */
 // image_pixel& image_pixel::operator/= (const image_pixel& rhs)
 // {
 //     for(int i = 0; i < size_; i++)
@@ -152,6 +218,12 @@ image_pixel& image_pixel::operator*= (const image_pixel& rhs)
 //     return *this;
 // }
 
+/**
+ * metoda wylaczona
+ * przeciazony operator '/=', przypisuje iloraz pixela z lewej strony przez skalar z prawej strony do siebie samego
+ * @param const reference do skalara, prawa strona ilorazu
+ * @return reference do image_pixel
+ */
 // template <typename T>
 // image_pixel& image_pixel::operator/= (const T & rhs)
 // {
@@ -163,6 +235,12 @@ image_pixel& image_pixel::operator*= (const image_pixel& rhs)
 //     return *this;
 // }
 
+
+/**
+ * przeciazony operator '&=', przypisuje logiczny AND pixela z lewej strony z pixelem z prawej strony do siebie samego
+ * @param const reference do image_pixel, prawa strona logicznego AND
+ * @return reference do image_pixel
+ */
 image_pixel& image_pixel::operator&= (const image_pixel& rhs)
 {
     for(int i = 0; i < size_; i++)

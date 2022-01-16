@@ -14,7 +14,7 @@ struct image_pixel
     int size_;
 
     image_pixel() : size_(0) {};
-    image_pixel(int size) : size_(size) { pixel_.push_back(0); pixel_.push_back(0), pixel_.push_back(0);};
+    image_pixel(int size) : size_(size) { for (int i = 0; i < size; i++) { pixel_.push_back(0); } };
     image_pixel(int size, uint16_t R, uint16_t G, uint16_t B) : size_(size) { pixel_.reserve(size); pixel_.push_back(R); pixel_.push_back(G); pixel_.push_back(B); };
     image_pixel(int size, uint16_t gray_scale) : size_(size) { pixel_.reserve(size); pixel_.push_back(gray_scale); };
     image_pixel(const image_pixel& obj);
